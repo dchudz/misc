@@ -73,6 +73,22 @@ rfDiamondsNoise = randomForest(diamondsBothNoise, factor(diamondsClasses),
                           ntree=100, proximity = TRUE, do.trace = TRUE)
 
 
+
+plot(1:10,1:10)
+dev.new()
+
+rows = sample(1:nrow(diamonds),4)
+png(filename = paste("four_diamonds.png",sep=""), width = 960, height = 960)
+par(mfrow = c(2,2))
+for (row in rows) image(toMatrix(diamonds[row,]))
+dev.off()
+
+png(filename = paste("four_diamonds_with_noise.png",sep=""), width = 960, height = 960)
+par(mfrow = c(2,2))
+for (row in rows) image(toMatrix(diamondsBothNoise[row,]))
+dev.off()
+
+
 ###
 #this function creates an "annotation_raster" object for adding to a ggplot
 ###
@@ -97,7 +113,10 @@ rows
 ARs = Map(function(n) makeARDiamond(n, .03, embeddingDiamonds$points, diamonds),  rows)
 p = qplot(X1, X2, data = data.frame(embeddingDiamonds$points))
 p
+png(filename = paste("diamondsRF.png",sep=""), width = 960, height = 960)
 Reduce("+", ARs, init = p)
+dev.off()
+
 
 ###
 #Based on random forest with diamond images that have added noise
@@ -110,7 +129,9 @@ ARs = Map(function(n) makeARDiamond(n, .03, embeddingDiamonds$points,
                                     diamondsBothNoise[1:nrow(diamonds),]),  rows)
 p = qplot(X1, X2, data = data.frame(embeddingDiamonds$points))
 p
+png(filename = paste("diamondsRFNoise.png",sep=""), width = 960, height = 960)
 Reduce("+", ARs, init = p)
+dev.off()
 
 #based on euclidean distance between images as vectors in R^2500
 proxEuclid = as.matrix(dist(as.matrix(diamonds)))
@@ -119,4 +140,6 @@ p = qplot(X1, X2, data = data.frame(embeddingEuclid$points))
 p
 rows = sample(1:nrow(proxUniform), 100)
 ARs = Map(function(n) makeARDiamond(n, .3, embeddingEuclid$points, diamonds),  rows)
+png(filename = paste("diamondsEuclidean.png",sep=""), width = 960, height = 960)
 print(Reduce("+", ARs, init = p))
+dev.off()
