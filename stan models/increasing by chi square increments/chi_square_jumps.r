@@ -69,7 +69,7 @@ fake_data_plot_with_aggregate
 # fitting stan model to (unaggregated) data
 increasing_model_dat <- parameters
 increasing_model_dat$y <- fake_data$y
-fit1 <- stan("increasing_function_with_chi_square_jumps.stan", data = increasing_model_dat, iter = 1000, chains = 4)
+fit1 <- stan("chi_square_jumps.stan", data = increasing_model_dat, iter = 1000, chains = 4)
 print(fit1)
 
 # let's plot the fake data with the posterior means of the mu's:
