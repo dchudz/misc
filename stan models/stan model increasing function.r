@@ -1,3 +1,5 @@
+#I should switch it so the vector of ys, mus, doesn't include 0
+
 library(rstan)
 library(ggplot2)
 library(plyr)
