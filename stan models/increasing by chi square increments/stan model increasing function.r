@@ -3,6 +3,7 @@ library(ggplot2)
 library(plyr)
 library(reshape2)
 setwd(Sys.getenv("GITHUB_PATH"))
+setwd("./misc/stan models/increasing by chi square increments/")
 
 # "generate_data" generates fake data according to this model (which is the same as the stan model I fit it to):
 # 
@@ -68,8 +69,7 @@ fake_data_plot_with_aggregate
 # fitting stan model to (unaggregated) data
 increasing_model_dat <- parameters
 increasing_model_dat$y <- fake_data$y
-fit1 <- stan("./misc/stan models/increasing_function_with_chi_square_jumps.stan", 
-             data = increasing_model_dat, iter = 1000, chains = 4)
+fit1 <- stan("increasing_function_with_chi_square_jumps.stan", data = increasing_model_dat, iter = 1000, chains = 4)
 print(fit1)
 
 # let's plot the fake data with the posterior means of the mu's:
@@ -97,7 +97,9 @@ model_plot_with_aggregated <- model_plot +
   geom_line(aes(x=fake_data_aggregate$t,y=mu_means_aggregated[1:N2], color="fitted mu on aggregated ys")) +
   ggtitle("the data, the true mu's, and the posterior means for each model")
 
-model_plot_with_aggregated
+jpeg("data and posterior means at two scales.jpeg")
+print(model_plot_with_aggregated)
+dev.off()
 
 # this looks nice!
 # the posterior means are a lot "smoother" than the truth -- but I don't think this should worry me 
@@ -122,8 +124,12 @@ fit1_samples$t <- fake_data$t  #using R's vector recycling feels dirty
 fit1_aggregated_samples <- samples_from_fit_to_DF(fit1_aggregated, "mu", 10)
 fit1_aggregated_samples$t <- fake_data_aggregate$t
 
-ggplot(data=rbind(fit1_samples, fit1_aggregated_samples)) + 
+plot_samples <- ggplot(data=rbind(fit1_samples, fit1_aggregated_samples)) + 
   geom_line(mapping=aes(x=t, y=mu, group=sample_num,color=model)) +
   ggtitle("ten random samples from each model (aggregated and unaggregated) posterior")
+plot_samples
+#these samples look reasonable -- aggregated and unaggregated versions are not so different 
 
-#reasonable-looking samples -- aggregated and unaggregated versions are not so different 
+jpeg("plot of samples from posteriors.jpeg")
+print(plot_samples)
+dev.off()
