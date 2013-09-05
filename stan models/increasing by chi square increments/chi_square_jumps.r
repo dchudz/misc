@@ -4,21 +4,8 @@ library(plyr)
 library(reshape2)
 setwd(Sys.getenv("GITHUB_PATH"))
 setwd("./misc/stan models/increasing by chi square increments/")
+source("data generation function.R")
 
-# "generate_data" generates fake data according to this model (which is the same as the stan model I fit it to):
-# 
-# For i in 1:N
-#
-#   mu_i ~ mu_{i-1} + s*chi_square(k_0/N)   (mu_0 = 0)
-#   y_y ~ N(mu_i, sqrt(sigma_0_sq*N))
-#   
-
-generate_data <- function(k_0, s, N, sigma_0_sq) {
-  mu <- s*cumsum(rchisq(N, k_0/N))
-  y <- mu + rnorm(N, sd=sqrt(sigma_0_sq*N))
-  t <- seq(1/N,1,1/N)
-  data.frame(t=t, mu=mu, y=y)
-}
 
 set.seed(38836)
 
@@ -45,10 +32,6 @@ fake_data <- generate_data(
 
 
 #plot the fake data:
-fake_data_plot <- ggplot() + scale_color_discrete("") +
-  geom_line(data=fake_data, mapping=aes(x=t,y=mu, color="mu")) +
-  geom_point(data=fake_data, mapping=aes(x=t,y=y,color="y")) 
-fake_data_plot
 
 #times for aggregated fake data need to be shifted left so they're at the middle of the aggregated range
 fake_data$group <- ceiling((fake_data$t)*N2)
