@@ -5,6 +5,11 @@ miscellaneous stuff
 
 This is a test:
 
-```{r}
+```r
 print("hi")
 ```
+
+```
+## [1] "hi"
+```
+
