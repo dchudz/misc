@@ -89,6 +89,7 @@ dev.off()
 # (they're means after all)
 
 #now I should plot some samples from each version (aggregated and not)
+#(only works for multi-dimensional parameters)
 samples_from_fit_to_DF <- function(fit, parameter, num_samples) {
   samples = extract(fit,pars=parameter)[[parameter]]
   sample_nums = sample.int(nrow(samples),num_samples)
@@ -98,8 +99,7 @@ samples_from_fit_to_DF <- function(fit, parameter, num_samples) {
   names(sampleDFlong) <- c("sample_num", parameter)
   sampleDFlong$model = deparse(substitute(fit))
   sampleDFlong
-}
- 
+} 
 
 fit1_samples <- samples_from_fit_to_DF(fit1, "mu", 10)
 fit1_samples$t <- fake_data$t  #using R's vector recycling feels dirty

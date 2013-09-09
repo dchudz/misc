@@ -1,0 +1,40 @@
+```{r libs,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+require(plyr)
+require(ggplot2)
+library(rstan)
+library(reshape2)
+setwd(Sys.getenv("GITHUB_PATH"))
+setwd("./misc/stan models/increasing by chi square increments/")
+source("data generation function.R")
+source("chi_square_jumps_hierarchical.R")
+```
+
+More samples and fits!
+
+```{r fit_many_models, fig.show='hide', cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+set.seed(657465)
+fits <- list()
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,5))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(20,10))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(15,5))
+fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(10,5))
+```
+
+Plot the data with the model fit:
+
+```{r display_many_fits, dependson="fit_many_models",error=FALSE, warning=FALSE, message=FALSE, echo=FALSE}
+for (fit in fits) {
+  print(fit$fit)
+  print(fit$plot + ggtitle("data and model, aggregated and not"))
+  plot_posteriors_both_models(fit, "mean_mu_N")
+  plot_posteriors_both_models(fit, "sigma_mu_N")
+  plot_posteriors_both_models(fit, "sigma_0")
+  plot_samples(fit, 20)
+}
+```

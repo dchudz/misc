@@ -1,0 +1,92 @@
+```{r libs,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+require(plyr)
+require(ggplot2)
+library(rstan)
+library(reshape2)
+setwd(Sys.getenv("GITHUB_PATH"))
+setwd("./misc/stan models/increasing by chi square increments/")
+source("data generation function.R")
+source("chi_square_jumps_hierarchical.R")
+```
+
+
+## Samples from uniform prior 
+
+(concentrate on straight line)
+
+```{r sample_from_restricted_uniform, fig.show='hide', cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+set.seed(342342)
+
+num_intervals=10
+samples <- matrix(runif(num_intervals*10*factorial(num_intervals)), ncol=num_intervals)
+samples <- samples[!apply(samples, 1, is.unsorted),]
+samples
+
+
+factorial(20)
+
+sample_from_restricted_uniform <- function(num_intervals) {
+  mus <- runif(num_intervals)
+  while(is.unsorted(mus)) mus <- runif(num_intervals)
+  mus
+}
+mus <- sample_from_restricted_uniform(10)
+plot(mus)
+
+?apply
+
+
+
+```
+
+```{r sample_from_restricted_uniform, fig.show='hide', dependson="sample_from_restricted_uniform",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+set.seed(1)
+fits1 <- generate_data_and_fit_both_models(50,10)
+```
+  
+
+
+## Setting up the prior
+
+Here are samples from the prior. First showing everything, and then zoomed in a bit.
+
+```{r samples_from_mU_prior,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+set.seed(38738)
+samples <- ldply(1:20, function(x) {
+  fake_data <- generate_data_including_hyperparameters(50)
+  fake_data$sample_number <- x
+  fake_data
+})
+samples
+ggplot() + geom_line(data=samples, mapping=aes(x=t,y=mu, color="mu", group=sample_number)) 
+```
+
+## Fitting the model
+
+```{r fit_model, fig.show='hide', cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+set.seed(1)
+fits1 <- generate_data_and_fit_both_models(50,10)
+```
+
+Plot the data with the model fit:
+
+```{r display_fit, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+print(fits1$plot + ggtitle("data and model, aggregated and not"))
+```
+
+I think the hyperparameters are mostly shrinkages from prior to toward truth?
+
+Aggregates and not are not too terribly different
+
+```{r posterior_hyperparameters, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+plot_posteriors_both_models(fits1, "mean_mu_N")
+plot_posteriors_both_models(fits1, "sigma_mu_N")
+plot_posteriors_both_models(fits1, "sigma_0")
+```
+
+Plot samples:
+
+```{r plot_posterior_sample_mus, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+set.seed(7373)
+plot_samples(fits1, 20)
+```

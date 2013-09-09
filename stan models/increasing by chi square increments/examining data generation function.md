@@ -8,7 +8,7 @@ Here we are just looking at the mu's (not the y's):
 
 Now we'll plot a few examples of mu's and y's:
 
-![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-21.png) ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-22.png) ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-23.png) ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-24.png) 
+
 
 
 

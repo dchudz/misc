@@ -15,6 +15,10 @@ generate_data <- function(k_0, s, N, sigma_0_sq) {
 }
 
 
+
+# "generate_data_mean_var" generates data from the same model as above, but with the mean/variance
+#   specified instead of k_0/s.
+#
 # E [ mu_N ]  = sum(E[ s*rchisq(k_0/N) ])
 #             = s * chi_squared(k_0)
 #             = s * k_0
@@ -23,7 +27,6 @@ generate_data <- function(k_0, s, N, sigma_0_sq) {
 #             = s^2 * Var(chi_squared(N)
 #             = s^2 * 2 * k_0
 #             = 2*s* E[mu_n]
-
 generate_data_mean_var <- function(mean_mu_N, sigma_mu_N_sq, N, sigma_0_sq) {
   s = sigma_mu_N_sq / (2 * mean_mu_N)
   k_0 = mean_mu_N / s
@@ -31,14 +34,14 @@ generate_data_mean_var <- function(mean_mu_N, sigma_mu_N_sq, N, sigma_0_sq) {
 }
 
 
-# mean is uniform on [0,100]
-# variance is uniform [0,2*mean_mu_n]  (much larger stddev than means seems unlikely here)
-
+# "generate_data_including_hyperparameters":
+#   samples the hyperparameters and then uses generate_data_mean_var to generate 
+#   data from the distributions determined by those hyperparameters
 generate_data_including_hyperparameters <- function(N) {
   
-  print(mean_mu_N <- runif(1)*1000)
-  print(sigma_mu_N <- runif(1)*mean_mu_N)
-  print(sigma_0 <- runif(1)*100)
+  mean_mu_N <- runif(1)*1000
+  sigma_mu_N <- runif(1)*mean_mu_N
+  sigma_0 <- runif(1)*(mean_mu_N)/10
   
   
   sigma_mu_N_sq <- sigma_mu_N**2
@@ -46,6 +49,19 @@ generate_data_including_hyperparameters <- function(N) {
 
   s = sigma_mu_N_sq / (2 * mean_mu_N)
   k_0 = mean_mu_N / s
-  generate_data(k_0, s, N, sigma_0_sq)  
+  
+  fake_data <- generate_data(k_0, s, N, sigma_0_sq)  
+  fake_data$mean_mu_N = mean_mu_N
+  fake_data$sigma_mu_N = sigma_mu_N
+  fake_data$sigma_0 = sigma_0
+  fake_data
+}
+
+#plotting the data
+plot_fake_data <- function(fake_data) {
+  fake_data_plot <- ggplot(data=fake_data) + scale_color_discrete("") +
+    geom_line(mapping=aes(x=t,y=mu, color="mu")) +
+    geom_point(mapping=aes(x=t,y=y,color="y")) 
+  fake_data_plot
 }
 

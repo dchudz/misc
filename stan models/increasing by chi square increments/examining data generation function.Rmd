@@ -25,13 +25,6 @@ ggplot() + geom_line(data=samples, mapping=aes(x=t,y=mu, color="mu", group=sampl
 Now we'll plot a few examples of mu's and y's:
 
 ```{r,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
-plot_fake_data <- function(fake_data) {
-  fake_data_plot <- ggplot() + scale_color_discrete("") +
-    geom_line(data=fake_data, mapping=aes(x=t,y=mu, color="mu")) +
-    geom_point(data=fake_data, mapping=aes(x=t,y=y,color="y")) 
-  print(fake_data_plot)
-}
-
 for (i in 1:4) {
   plot_fake_data(generate_data_including_hyperparameters(20))
 }
