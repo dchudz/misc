@@ -4,7 +4,25 @@
 
 ## Samples from uniform prior 
 
+uniform conditional on increasing is the same as uniform, then sort.
+why?
+
+$$p(\mu_k=x | \mu_1 < \mu_2 < ... < \mu_N )$$
+
+is proportional to the probability that the first $k-1$ $\mu_i$'s are less than $x$ and the last $n-k$ $\mu_i$'s are greater than $x$. 
+
+If instead we get $\mu_i$'s by drawing each from i.i.d. uniform and sorting, then 
+
+$$p(\mu_k=x)$$
+
+is proportional the probability that $k-1$ $\mu_i$'s are less than $x$ and exactly $n-k$ $\mu_i$'s are greater than $x$. 
+
 (concentrate on straight line)
+
+![plot of chunk sample_from_restricted_uniform](figure/sample_from_restricted_uniform1.png) ![plot of chunk sample_from_restricted_uniform](figure/sample_from_restricted_uniform2.png) 
+
+  
+
 
 ## Setting up the prior
 
