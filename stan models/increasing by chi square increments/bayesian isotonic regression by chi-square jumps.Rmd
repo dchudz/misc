@@ -9,28 +9,43 @@ source("data generation function.R")
 source("chi_square_jumps_hierarchical.R")
 ```
 
+## Samples from uniform prior
 
-## Samples from uniform prior 
+I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\theta_i=f(\frac{i}{k})$ (for $i \in \{1,2,3,...,k-1\}$)
 
-uniform conditional on increasing is the same as uniform, then sort.
-why?
+at equally that's constrained to be increasing, and how you'll really be led astray by a prior that's uniform over the function values at discrete points (with a restriction that the values are increasing). As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
 
-$$p(\mu_k=x | \mu_1 < \mu_2 < ... < \mu_N )$$
 
-is proportional to the probability that the first $k-1$ $\mu_i$'s are less than $x$ and the last $n-k$ $\mu_i$'s are greater than $x$. 
+The paper doesn't include an examples of sampels from this distribution, so I've added it here to help with intuition:
 
-If instead we get $\mu_i$'s by drawing each from i.i.d. uniform and sorting, then 
+This is very weird. Under the uniform distribution, each (legal) path is equally likely. It just turns out that for large $k$, almost all legal paths are basically straight lines.
 
-$$p(\mu_k=x)$$
+### (other high-dimensional weirdness -- )
 
-is proportional the probability that $k-1$ $\mu_i$'s are less than $x$ and exactly $n-k$ $\mu_i$'s are greater than $x$. 
+Increasing uniform tends to straight line. 
+Most of mass of sphere is near equator. 
+Examples from that other entropy book. 
 
-(concentrate on straight line)
+
+(top p. 220 is all the explanation we need)
 
 ```{r sample_from_restricted_uniform, cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 
-plot(sort(runif(100)))
-plot(sort(runif(1000)))
+
+sample_from_restricted_uniform <- function(N) {
+  data.frame(mu = c(0,sort(runif(N-1)),1), t=(0:N)/N)
+}
+
+k_samples_N_internals <- function(N, k, sample_function)
+  ldply(1:k, function(k) {
+    samples <- sample_function(N)
+    samples$sample_num = k
+    samples$N = N
+    samples
+  })
+
+samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, sample_from_restricted_uniform))
+ggplot(data=transform(samples, N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
 
 ```
   
@@ -38,17 +53,43 @@ plot(sort(runif(1000)))
 
 ## Setting up the prior
 
+
+(Use same method as below to show samples for low and high variance (relative to mean))
+
+(add 0 to these plots... dedup on sample_num, N... add t=0,y=0,mu=0 to each...)
+
+```{r samples_from_mu_prior_and_hyperparameters,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+
+addZerosToSamples <- function(samples) {
+  samplesZero <- samples[!duplicated(samples[,c("sample_num","N")]),]
+  samplesZero[,c("mu","y","t")] <- 0
+  rbind(samples,samplesZero)
+}
+
+samples <- ldply(c(10,100,1000), 
+                 function(N) k_samples_N_internals(N, 20, 
+                                                   function(N) generate_data_mean_var(500, (400**2), N, 1)))
+
+ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + 
+  geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
+
+samples <- ldply(c(10,100,1000), 
+                 function(N) k_samples_N_internals(N, 20, 
+                                                   function(N) generate_data_mean_var(500, (100**2), N, 1)))
+
+ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
+
+```
+
+note that there's no control over the shape of the functuin $f$ independent of the mean and variance of $f(1)$. I believe this will be true of any model composed of independent "jumps" (conditional on the mean/variance of $f(1)$, my jumps are independent). A natural extension would be to add a correlation structure to the jumps.
+
 Here are samples from the prior. First showing everything, and then zoomed in a bit.
 
-```{r samples_from_mU_prior,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+```{r samples_from_mu_prior_and_hyperparameters2,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 set.seed(38738)
-samples <- ldply(1:20, function(x) {
-  fake_data <- generate_data_including_hyperparameters(50)
-  fake_data$sample_number <- x
-  fake_data
-})
-samples
-ggplot() + geom_line(data=samples, mapping=aes(x=t,y=mu, color="mu", group=sample_number)) 
+samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, generate_data_including_hyperparameters))
+ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
+last_plot() + coord_cartesian(ylim=c(0,1000))
 ```
 
 ## Fitting the model

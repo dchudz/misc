@@ -1,34 +1,37 @@
 
 
 
+## Samples from uniform prior
 
-## Samples from uniform prior 
+I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\theta_i=f(\frac{i}{k})$ (for $i \in \{1,2,3,...,k-1\}$)
 
-uniform conditional on increasing is the same as uniform, then sort.
-why?
+at equally that's constrained to be increasing, and how you'll really be led astray by a prior that's uniform over the function values at discrete points (with a restriction that the values are increasing). As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
 
-$$p(\mu_k=x | \mu_1 < \mu_2 < ... < \mu_N )$$
 
-is proportional to the probability that the first $k-1$ $\mu_i$'s are less than $x$ and the last $n-k$ $\mu_i$'s are greater than $x$. 
+The paper doesn't include an examples of sampels from this distribution, so I've added it here to help with intuition:
 
-If instead we get $\mu_i$'s by drawing each from i.i.d. uniform and sorting, then 
+(top p. 220 is all the explanation we need)
 
-$$p(\mu_k=x)$$
-
-is proportional the probability that $k-1$ $\mu_i$'s are less than $x$ and exactly $n-k$ $\mu_i$'s are greater than $x$. 
-
-(concentrate on straight line)
-
-![plot of chunk sample_from_restricted_uniform](figure/sample_from_restricted_uniform1.png) ![plot of chunk sample_from_restricted_uniform](figure/sample_from_restricted_uniform2.png) 
+![plot of chunk sample_from_restricted_uniform](figure/sample_from_restricted_uniform.png) 
 
   
 
 
 ## Setting up the prior
 
+
+(Use same method as below to show samples for low and high variance (relative to mean))
+
+(add 0 to these plots... dedup on sample_num, N... add t=0,y=0,mu=0 to each...)
+
+![plot of chunk samples_from_mu_prior_and_hyperparameters](figure/samples_from_mu_prior_and_hyperparameters1.png) ![plot of chunk samples_from_mu_prior_and_hyperparameters](figure/samples_from_mu_prior_and_hyperparameters2.png) 
+
+
+note that there's no control over the shape of the functuin $f$ independent of the mean and variance of $f(1)$. I believe this will be true of any model composed of independent "jumps" (conditional on the mean/variance of $f(1)$, my jumps are independent). A natural extension would be to add a correlation structure to the jumps.
+
 Here are samples from the prior. First showing everything, and then zoomed in a bit.
 
-![plot of chunk samples_from_mU_prior](figure/samples_from_mU_prior.png) 
+![plot of chunk samples_from_mu_prior_and_hyperparameters2](figure/samples_from_mu_prior_and_hyperparameters21.png) ![plot of chunk samples_from_mu_prior_and_hyperparameters2](figure/samples_from_mu_prior_and_hyperparameters22.png) 
 
 
 ## Fitting the model
