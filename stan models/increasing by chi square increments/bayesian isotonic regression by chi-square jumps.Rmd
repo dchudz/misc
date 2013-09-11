@@ -9,15 +9,13 @@ source("data generation function.R")
 source("chi_square_jumps_hierarchical.R")
 ```
 
-(I should change mu's to theta's here and in the code...)
-
 *This post will describe a way I came up with of doing Bayesian isotonic regression and implemented in [Stan](http://mc-stan.org/). If you want practical help, expert research, or to learn anything about what's standard in the field, this isn't the place for you (Andrew Gelman pointed me to David Dunson whose work seems really interesting so maybe check him out) . This **is** the place for you if you want to read about how I thought about setting up a model, implemented the model in Stan, and created graphics to understand what was going on.*
 
 *You can see the source for this post, including markdown and and R code, [here](http://github.com/dchudz/misc/blob/master/stan%20models/increasing%20by%20chi%20square%20increments/bayesian%20isotonic%20regression%20by%20chi-square%20jumps.Rmd).*
 
-I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\mu_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$).
+I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\theta_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$).
 
-What prior should we use for the $mu_i$'s? It might seem reasonable to use the prior for which the posterior mode is the maximum likelihood estimate. That is, make the $mu_i$'s independent and uniform on $[0,1]$ (with the restriction that non-increasing sets of $\{mu_i\}$ are given zero probability). But this turns out badly! Gelman notes that this prior on the $mu_i$'s is the same as the distribution of the order statistics of a samples of size $N-1$ from the uniform distribution on $[0,1]$. As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
+What prior should we use for the $theta_i$'s? It might seem reasonable to use the prior for which the posterior mode is the maximum likelihood estimate. That is, make the $theta_i$'s independent and uniform on $[0,1]$ (with the restriction that non-increasing sets of $\{theta_i\}$ are given zero probability). But this turns out badly! Gelman notes that this prior on the $theta_i$'s is the same as the distribution of the order statistics of a samples of size $N-1$ from the uniform distribution on $[0,1]$. As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
 
 To help with intuition, here are some samples from the distribution, for various $N$:
 
@@ -25,7 +23,7 @@ To help with intuition, here are some samples from the distribution, for various
 
 
 sample_from_restricted_uniform <- function(N) {
-  data.frame(mu = c(0,sort(runif(N-1)),1), t=(0:N)/N)
+  data.frame(theta = c(0,sort(runif(N-1)),1), t=(0:N)/N)
 }
 
 k_samples_N_internals <- function(N, k, sample_function)
@@ -37,7 +35,7 @@ k_samples_N_internals <- function(N, k, sample_function)
   })
 
 samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, sample_from_restricted_uniform))
-ggplot(data=transform(samples, N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
+ggplot(data=transform(samples, N=factor(N))) + geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num)))
 
 ```
 
@@ -48,33 +46,33 @@ Increasing uniform tends to straight line.
 Most of mass of sphere is near equator. 
 Examples from that other entropy book. 
   
-So what model should we use instead? For my convenience (and perhaps to be more realistic) I'll switch to the case where $mu_N$ ($f(1)$) isn't known to be $1$. The goal is the have a model which will behave in the same way at each scale of discretization -- our results shouldn't differ too much when $N=10$ vs. $N=100$. To accomplish this, I model $mu_N$ as a jump drawn from a chi squared distribution. This is nice since 1 jump that's distributed as $chi-squared(k)$  is then equivalent to  $n$  independent jumps that are distributed as $chi-squared(k/n)$. Then our prior for the function $f$  is independent of the scale of the discretization, as long as we scale the parameter correctly:
+So what model should we use instead? For my convenience (and perhaps to be more realistic) I'll switch to the case where $theta_N$ ($f(1)$) isn't known to be $1$. The goal is the have a model which will behave in the same way at each scale of discretization -- our results shouldn't differ too much when $N=10$ vs. $N=100$. To accomplish this, I model $theta_N$ as a jump drawn from a chi squared distribution. This is nice since 1 jump that's distributed as $chi-squared(k)$  is then equivalent to  $n$  independent jumps that are distributed as $chi-squared(k/n)$. Then our prior for the function $f$  is independent of the scale of the discretization, as long as we scale the parameter correctly:
 
-$$mu_i ~ mu_{i-1} + s*chi_square(k_0/N)$$ (the factor of $s$ lets us control the mean/variance of the jumps independently)
+$$\theta_i ~ \theta_{i-1} + s*chi_square(k_0/N)$$ (the factor of $s$ lets us control the mean/variance of the jumps independently)
 
-I chose to express $s$ and $k_0$ in terms of the mean and variance of $mu_N$:
+I chose to express $s$ and $k_0$ in terms of the mean and variance of $\theta_N$:
 
 $$s = ...\mu_N ... \sigma_N ...$$
 $$k_0 = ...\mu_N ... \sigma_N ...$$
 
 
-I'll assume that we have data $y_i$ from a normal distribution centered on $mu_i$. The variance of the $y$'s  should scale with 1/N, since I'm assuming that the $y$'s at a coarser scale should be thought of as an average of the $y$'s at a finer scale:
+I'll assume that we have data $y_i$ from a normal distribution centered on $\theta_i$. The variance of the $y$'s  should scale with 1/N, since I'm assuming that the $y$'s at a coarser scale should be thought of as an average of the $y$'s at a finer scale (and thus have lower variance):
 
-y_i ~ N(mu_i, sqrt({sigma_y}^2*N))
+$$y_i ~ N(\theta_i, \sqrt{{sigma_y}^2*N})$$
 
-We need priors for $\mu_N$, $\sigma_N$, and $sigma_y$. This would naturally depend on the problem, but I decided that both the variance of $\theta_N$ and the variance of the data $y_i$ should be sensitive to the mean $\mu_i$ of $\theta_n$:
+We need priors for $\mu_N$, $\sigma_N$, and $sigma_y$. This would naturally depend on the problem at hand, but I decided that both the variance of $\theta_N$ and the variance of the data $y_i$ should be sensitive to the mean $\theta_i$ of $\theta_n$:
 
-$$\mu_N ~ $$
-$$\sigma_N ~ $$
-$$\sigma_y ~ $$
+$$\mu_N ~ U[0,1000]$$
+$$\sigma_N ~ U[0,\mu_N]$$
+$$\sigma_y ~ U[0,\frac{\mu_N}{10}$$
 
-Here are some samples from my prior for the $\mu_i$:
+Here are some samples from my prior for the $\theta_i$:
 
-```{r samples_from_mu_prior_and_hyperparameters,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+```{r samples_from_theta_prior_and_hyperparameters,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 
 addZerosToSamples <- function(samples) {
   samplesZero <- samples[!duplicated(samples[,c("sample_num","N")]),]
-  samplesZero[,c("mu","y","t")] <- 0
+  samplesZero[,c("theta","y","t")] <- 0
   rbind(samples,samplesZero)
 }
 
@@ -83,13 +81,13 @@ samples <- ldply(c(10,100,1000),
                                                    function(N) generate_data_mean_var(500, (400**2), N, 1)))
 
 ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + 
-  geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
+  geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num)))
 
 samples <- ldply(c(10,100,1000), 
                  function(N) k_samples_N_internals(N, 20, 
                                                    function(N) generate_data_mean_var(500, (100**2), N, 1)))
 
-ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
+ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num)))
 
 ```
 
@@ -97,10 +95,10 @@ note that there's no control over the shape of the functuin $f$ independent of t
 
 Here are samples from the prior. First showing everything, and then zoomed in a bit.
 
-```{r samples_from_mu_prior_and_hyperparameters2,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+```{r samples_from_theta_prior_and_hyperparameters2,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 set.seed(38738)
 samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, generate_data_including_hyperparameters))
-ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
+ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num)))
 last_plot() + coord_cartesian(ylim=c(0,1000))
 ```
 
@@ -122,14 +120,14 @@ I think the hyperparameters are mostly shrinkages from prior to toward truth?
 Aggregates and not are not too terribly different
 
 ```{r posterior_hyperparameters, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
-plot_posteriors_both_models(fits1, "mean_mu_N")
-plot_posteriors_both_models(fits1, "sigma_mu_N")
-plot_posteriors_both_models(fits1, "sigma_0")
+plot_posteriors_both_models(fits1, "mu_N")
+plot_posteriors_both_models(fits1, "sigma_N")
+plot_posteriors_both_models(fits1, "sigma_y")
 ```
 
 Plot samples:
 
-```{r plot_posterior_sample_mus, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+```{r plot_posterior_sample_thetas, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 set.seed(7373)
 plot_samples(fits1, 20)
 ```
