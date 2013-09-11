@@ -9,11 +9,17 @@ source("data generation function.R")
 source("chi_square_jumps_hierarchical.R")
 ```
 
+(Note: This post was written )
+
 ## Samples from uniform prior
 
-I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\theta_i=f(\frac{i}{k})$ (for $i \in \{1,2,3,...,k-1\}$)
+I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\mu_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$)
 
-at equally that's constrained to be increasing, and how you'll really be led astray by a prior that's uniform over the function values at discrete points (with a restriction that the values are increasing). As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
+What prior should we use for the $mu_i$'s? It might seem reasonable to use the prior for which the posterior mode is the maximum likelihood estimate. That is, make the $mu_i$'s independent and uniform on $[0,1]$ (with the restriction that non-increasing sets of $mu_i$ are given zero probability). But this turns out badly! Gelman notes that this prior on the $mu_i$'s is equivalent to saying that $\mu_1,\mu_2,...,mu_{N-1}$ are the order statistics of a samples of size $N-1$ from the uniform distribution on $[0,1]$.
+
+To help with intuition, here are some samples...
+
+As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
 
 
 The paper doesn't include an examples of sampels from this distribution, so I've added it here to help with intuition:
