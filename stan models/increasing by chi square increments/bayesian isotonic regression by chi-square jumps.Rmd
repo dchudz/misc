@@ -9,11 +9,13 @@ source("data generation function.R")
 source("chi_square_jumps_hierarchical.R")
 ```
 
-(Note: You can see the source for this post, including markdown and and R code, [here](source).
+*This post will describe a way I came up with of doing Bayesian isotonic regression using [Stan](http://mc-stan.org/). If you want practical help, expert research, or to learn anything about what's standard in the field, this isn't the place for you. This **is** the place for you if you want to read about how I thought about setting up a model, implemented the model in Stan, created lots of visuals to check my work.*
+
+You can see the source for this post, including markdown and and R code, [here](source).
 
 ## Samples from uniform prior
 
-I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\mu_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$)
+I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\mu_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$).
 
 What prior should we use for the $mu_i$'s? It might seem reasonable to use the prior for which the posterior mode is the maximum likelihood estimate. That is, make the $mu_i$'s independent and uniform on $[0,1]$ (with the restriction that non-increasing sets of $\{mu_i\}$ are given zero probability). But this turns out badly! Gelman notes that this prior on the $mu_i$'s is the same as the distribution of the order statistics of a samples of size $N-1$ from the uniform distribution on $[0,1]$. As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
 
@@ -42,11 +44,23 @@ ggplot(data=transform(samples, N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, 
 This weird! Under the uniform distribution, each (legal) path is equally likely. It just turns out that for large $k$, almost all legal paths are basically straight lines. It reminds me a bit of statistical mechanics, which is largely about micro-level randomness determining macro-level properties. (I'm no expert, but I recommend [this book](http://pages.physics.cornell.edu/~sethna/StatMech/).)
 
 ### (other high-dimensional weirdness -- )
-
 Increasing uniform tends to straight line. 
 Most of mass of sphere is near equator. 
 Examples from that other entropy book. 
   
+So what model should we use instead? For my convenience (and to be more realistic?) I'll switch to the case where $mu_N$ ($f(1)$) isn't known to be $1$. The goal is the have a model which will behave in the same way at each scale of discretization -- our results shouldn't differ too much when $N=10$ vs. $N=100$. 
+
+ Each data point  y[i]  is drawn from a normal distribution centered on  mu[i].   
+
+I modeled the jumps as chi-squared-distributed. This is nice since 1 jump that's distributed as chi-squared(k)  is then equivalent to  n  independent jumps that are distributed as  chi-squared(k/N). Then our prior for the function  mu  is independent of the scale of the discretization if we express it in terms of  k_0, where the sum of all the jumps (which is  mu[N]  ) is distributed as  chi-squared(k_0). Similarly, the variance of the  y's  should scale with  1/N, since I'm assuming that the  y's  at a coarser scale are an average of the y's at a finer scale.  So the model is:
+
+(For i in 1:N):
+
+mu_i ~ mu_{i-1} + s*chi_square(k_0/N)   (mu_0 = 0)  
+y_y ~ N(mu_i, sqrt(sigma_0_sq*N))
+
+(The parameter  s  lets us vary both the size and variance of the jumps. Maybe it would have been better to express the model explicitly in terms of the jump size/variance independently.)
+
 
 
 ## Setting up the prior
