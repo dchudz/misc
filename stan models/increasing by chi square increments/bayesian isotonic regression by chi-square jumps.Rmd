@@ -11,7 +11,7 @@ source("chi_square_jumps_hierarchical.R")
 
 (I should change mu's to theta's here and in the code...)
 
-*This post will describe a way I came up with of doing Bayesian isotonic regression using [Stan](http://mc-stan.org/). If you want practical help, expert research, or to learn anything about what's standard in the field, this isn't the place for you. This **is** the place for you if you want to read about how I thought about setting up a model, implemented the model in Stan, and created graphics to understand what was going on.*
+*This post will describe a way I came up with of doing Bayesian isotonic regression using [Stan](http://mc-stan.org/). If you want practical help, expert research, or to learn anything about what's standard in the field, this isn't the place for you (Andrew Gelman pointed me to ___'s work which seems a bit different, so maybe check him out) . This **is** the place for you if you want to read about how I thought about setting up a model, implemented the model in Stan, and created graphics to understand what was going on.*
 
 *You can see the source for this post, including markdown and and R code, [here](source).*
 
