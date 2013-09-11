@@ -4,14 +4,14 @@ library("ggplot2")
 # 
 # For i in 1:N
 #
-#   mu_i ~ mu_{i-1} + s*chi_square(k_0/N)   (mu_0 = 0)
-#   y_y ~ N(mu_i, sqrt(sigma_0_sq*N))
+#   theta_i ~ theta_{i-1} + s*chi_square(k_0/N)   (theta_0 = 0)
+#   y_y ~ N(theta_i, sqrt(sigma_y_sq*N))
 #   
-generate_data <- function(k_0, s, N, sigma_0_sq) {
-  mu <- s*cumsum(rchisq(N, k_0/N))
-  y <- mu + rnorm(N, sd=sqrt(sigma_0_sq*N))
+generate_data <- function(k_0, s, N, sigma_y_sq) {
+  theta <- s*cumsum(rchisq(N, k_0/N))
+  y <- theta + rnorm(N, sd=sqrt(sigma_y_sq*N))
   t <- seq(1/N,1,1/N)
-  data.frame(t=t, mu=mu, y=y)
+  data.frame(t=t, theta=theta, y=y)
 }
 
 
@@ -19,18 +19,18 @@ generate_data <- function(k_0, s, N, sigma_0_sq) {
 # "generate_data_mean_var" generates data from the same model as above, but with the mean/variance
 #   specified instead of k_0/s.
 #
-# E [ mu_N ]  = sum(E[ s*rchisq(k_0/N) ])
+# E [ theta_N ]  = sum(E[ s*rchisq(k_0/N) ])
 #             = s * chi_squared(k_0)
 #             = s * k_0
 #
-# Var[ mu_N ] = sum(Var[ s*rchisq(k_0/N) ])
+# Var[ theta_N ] = sum(Var[ s*rchisq(k_0/N) ])
 #             = s^2 * Var(chi_squared(N)
 #             = s^2 * 2 * k_0
-#             = 2*s* E[mu_n]
-generate_data_mean_var <- function(mean_mu_N, sigma_mu_N_sq, N, sigma_0_sq) {
-  s = sigma_mu_N_sq / (2 * mean_mu_N)
-  k_0 = mean_mu_N / s
-  generate_data(k_0, s, N, sigma_0_sq)  
+#             = 2*s* E[theta_n]
+generate_data_mean_var <- function(mu_N, sigma_N_sq, N, sigma_y_sq) {
+  s = sigma_N_sq / (2 * mu_N)
+  k_0 = mu_N / s
+  generate_data(k_0, s, N, sigma_y_sq)  
 }
 
 
@@ -39,28 +39,28 @@ generate_data_mean_var <- function(mean_mu_N, sigma_mu_N_sq, N, sigma_0_sq) {
 #   data from the distributions determined by those hyperparameters
 generate_data_including_hyperparameters <- function(N) {
   
-  mean_mu_N <- runif(1)*1000
-  sigma_mu_N <- runif(1)*mean_mu_N
-  sigma_0 <- runif(1)*(mean_mu_N)/10
+  mu_N <- runif(1)*1000
+  sigma_N <- runif(1)*mu_N
+  sigma_y <- runif(1)*(mu_N)/10
   
   
-  sigma_mu_N_sq <- sigma_mu_N**2
-  sigma_0_sq <- sigma_0**2 
+  sigma_N_sq <- sigma_N**2
+  sigma_y_sq <- sigma_y**2 
 
-  s = sigma_mu_N_sq / (2 * mean_mu_N)
-  k_0 = mean_mu_N / s
+  s = sigma_N_sq / (2 * mu_N)
+  k_0 = mu_N / s
   
-  fake_data <- generate_data(k_0, s, N, sigma_0_sq)  
-  fake_data$mean_mu_N = mean_mu_N
-  fake_data$sigma_mu_N = sigma_mu_N
-  fake_data$sigma_0 = sigma_0
+  fake_data <- generate_data(k_0, s, N, sigma_y_sq)  
+  fake_data$mu_N = mu_N
+  fake_data$sigma_N = sigma_N
+  fake_data$sigma_y = sigma_y
   fake_data
 }
 
 #plotting the data
 plot_fake_data <- function(fake_data) {
   fake_data_plot <- ggplot(data=fake_data) + scale_color_discrete("") +
-    geom_line(mapping=aes(x=t,y=mu, color="mu")) +
+    geom_line(mapping=aes(x=t,y=theta, color="theta")) +
     geom_point(mapping=aes(x=t,y=y,color="y")) 
   fake_data_plot
 }

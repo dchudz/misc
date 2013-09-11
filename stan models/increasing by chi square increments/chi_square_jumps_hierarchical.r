@@ -23,21 +23,21 @@ generate_data_and_fit_both_models <- function(N, N2) {
                  data = list(N=N, y=fake_data$y), iter = 2000, chains = 4)
   print(fit1)  
   
-  #add fitted mu's from this model to plot
-  fake_data$posterior_mu_means <- get_posterior_mean(fit1,pars="mu")[,5]
+  #add fitted theta's from this model to plot
+  fake_data$posterior_theta_means <- get_posterior_mean(fit1,pars="theta")[,5]
 
   #fit aggregates model
   fit1_aggregated <- stan(fit= fit1, data = list(N=N2, y=fake_data_aggregate$y), iter = 2000, chains = 4)
   print(fit1_aggregated)
     
-  #add fitted mu's from aggregated model to plot  
-  fake_data_aggregate$poserior_mu_means <- get_posterior_mean(fit1_aggregated,pars="mu")[,5]
+  #add fitted theta's from aggregated model to plot  
+  fake_data_aggregate$poserior_theta_means <- get_posterior_mean(fit1_aggregated,pars="theta")[,5]
   
   fake_data_plot_with_aggregate <- plot_fake_data(fake_data)  +
-    geom_line(data=fake_data, aes(x=t,y=posterior_mu_means, color="posterior mu means")) +
+    geom_line(data=fake_data, aes(x=t,y=posterior_theta_means, color="posterior theta means")) +
     geom_point(data=fake_data_aggregate, mapping=aes(x=t,y=y, color="y aggregated"), size=5, alpha=.5) + 
-    geom_line(data=fake_data_aggregate, aes(x=t,y=poserior_mu_means, color="posterior mu means from aggregates")) +
-    ggtitle("true mu's, y's, the posterior mu means for each model")
+    geom_line(data=fake_data_aggregate, aes(x=t,y=poserior_theta_means, color="posterior theta means from aggregates")) +
+    ggtitle("true theta's, y's, the posterior theta means for each model")
     
   #return useful stuff
   list(fake_data=fake_data, 
@@ -81,10 +81,10 @@ samples_from_fit_to_DF <- function(fit, parameter, num_samples) {
 
 plot_samples <- function(fit, n) {
 
-  fit_samples <- samples_from_fit_to_DF(fit$fit, "mu", n)
+  fit_samples <- samples_from_fit_to_DF(fit$fit, "theta", n)
   fit_samples$t <- fit$fake_data$t  #using R's vector recycling feels dirty
   
-  fit_aggregated_samples <- samples_from_fit_to_DF(fit$fit_aggregated, "mu", n)
+  fit_aggregated_samples <- samples_from_fit_to_DF(fit$fit_aggregated, "theta", n)
   fit_aggregated_samples$t <- fit$fake_data_aggregate$t
   
   fake_data <- fit$fake_data
@@ -94,9 +94,9 @@ plot_samples <- function(fit, n) {
   
   
   plot_samples <- ggplot(data=rbind(fit_samples, fit_aggregated_samples, fake_data)) + 
-    geom_line(mapping=aes(x=t, y=mu, group=sample_num,color=model, 
+    geom_line(mapping=aes(x=t, y=theta, group=sample_num,color=model, 
                           size=ifelse(model=="truth","truth","models" )), alpha=1) +
-    ggtitle("samples from each model (aggregated and unaggregated) posterior mu") +
+    ggtitle("samples from each model (aggregated and unaggregated) posterior theta") +
     scale_size_discrete("")
   plot_samples
 

@@ -11,9 +11,9 @@ source("chi_square_jumps_hierarchical.R")
 
 (I should change mu's to theta's here and in the code...)
 
-*This post will describe a way I came up with of doing Bayesian isotonic regression using [Stan](http://mc-stan.org/). If you want practical help, expert research, or to learn anything about what's standard in the field, this isn't the place for you (Andrew Gelman pointed me to ___'s work which seems a bit different, so maybe check him out) . This **is** the place for you if you want to read about how I thought about setting up a model, implemented the model in Stan, and created graphics to understand what was going on.*
+*This post will describe a way I came up with of doing Bayesian isotonic regression and implemented in [Stan](http://mc-stan.org/). If you want practical help, expert research, or to learn anything about what's standard in the field, this isn't the place for you (Andrew Gelman pointed me to David Dunson whose work seems really interesting so maybe check him out) . This **is** the place for you if you want to read about how I thought about setting up a model, implemented the model in Stan, and created graphics to understand what was going on.*
 
-*You can see the source for this post, including markdown and and R code, [here](source).*
+*You can see the source for this post, including markdown and and R code, [here](http://github.com/dchudz/misc/blob/master/stan%20models/increasing%20by%20chi%20square%20increments/bayesian%20isotonic%20regression%20by%20chi-square%20jumps.Rmd).*
 
 I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\mu_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$).
 
@@ -50,7 +50,7 @@ Examples from that other entropy book.
   
 So what model should we use instead? For my convenience (and perhaps to be more realistic) I'll switch to the case where $mu_N$ ($f(1)$) isn't known to be $1$. The goal is the have a model which will behave in the same way at each scale of discretization -- our results shouldn't differ too much when $N=10$ vs. $N=100$. To accomplish this, I model $mu_N$ as a jump drawn from a chi squared distribution. This is nice since 1 jump that's distributed as $chi-squared(k)$  is then equivalent to  $n$  independent jumps that are distributed as $chi-squared(k/n)$. Then our prior for the function $f$  is independent of the scale of the discretization, as long as we scale the parameter correctly:
 
-* $$mu_i ~ mu_{i-1} + s*chi_square(k_0/N)$$ (the factor of $s$ lets us control the mean/variance of the jumps independently)
+$$mu_i ~ mu_{i-1} + s*chi_square(k_0/N)$$ (the factor of $s$ lets us control the mean/variance of the jumps independently)
 
 I chose to express $s$ and $k_0$ in terms of the mean and variance of $mu_N$:
 
