@@ -9,31 +9,15 @@ source("data generation function.R")
 source("chi_square_jumps_hierarchical.R")
 ```
 
-(Note: This post was written )
+(Note: You can see the source for this post, including markdown and and R code, [here](source).
 
 ## Samples from uniform prior
 
 I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about scale-insensitivity as a way to think about what prior distributions might be reasonable for Bayesian models. As one example, he describes fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We're estimating the function at $k-1$ equally spaces sample points, with $\mu_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$)
 
-What prior should we use for the $mu_i$'s? It might seem reasonable to use the prior for which the posterior mode is the maximum likelihood estimate. That is, make the $mu_i$'s independent and uniform on $[0,1]$ (with the restriction that non-increasing sets of $mu_i$ are given zero probability). But this turns out badly! Gelman notes that this prior on the $mu_i$'s is equivalent to saying that $\mu_1,\mu_2,...,mu_{N-1}$ are the order statistics of a samples of size $N-1$ from the uniform distribution on $[0,1]$.
+What prior should we use for the $mu_i$'s? It might seem reasonable to use the prior for which the posterior mode is the maximum likelihood estimate. That is, make the $mu_i$'s independent and uniform on $[0,1]$ (with the restriction that non-increasing sets of $\{mu_i\}$ are given zero probability). But this turns out badly! Gelman notes that this prior on the $mu_i$'s is the same as the distribution of the order statistics of a samples of size $N-1$ from the uniform distribution on $[0,1]$. As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
 
-To help with intuition, here are some samples...
-
-As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which is bad.
-
-
-The paper doesn't include an examples of sampels from this distribution, so I've added it here to help with intuition:
-
-This is very weird. Under the uniform distribution, each (legal) path is equally likely. It just turns out that for large $k$, almost all legal paths are basically straight lines.
-
-### (other high-dimensional weirdness -- )
-
-Increasing uniform tends to straight line. 
-Most of mass of sphere is near equator. 
-Examples from that other entropy book. 
-
-
-(top p. 220 is all the explanation we need)
+To help with intuition, here are some samples from the distribution, for various $N$:
 
 ```{r sample_from_restricted_uniform, cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 
@@ -54,6 +38,14 @@ samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, sample
 ggplot(data=transform(samples, N=factor(N))) + geom_line(mapping=aes(x=t, y=mu, color=N, group=paste(N,sample_num)))
 
 ```
+
+This weird! Under the uniform distribution, each (legal) path is equally likely. It just turns out that for large $k$, almost all legal paths are basically straight lines. It reminds me a bit of statistical mechanics, which is largely about micro-level randomness determining macro-level properties. (I'm no expert, but I recommend [this book](http://pages.physics.cornell.edu/~sethna/StatMech/).)
+
+### (other high-dimensional weirdness -- )
+
+Increasing uniform tends to straight line. 
+Most of mass of sphere is near equator. 
+Examples from that other entropy book. 
   
 
 
