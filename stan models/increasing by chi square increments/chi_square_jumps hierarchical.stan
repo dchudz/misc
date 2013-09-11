@@ -22,7 +22,7 @@ transformed parameters {
   sigma_N_sq <- pow(sigma_N , 2);
   s <- sigma_N_sq / (2 * mu_N);
   k_0 <- mu_N / s;
-  theta <- cumlative_sum(s*jump);
+  theta <- cumulative_sum(s*jump);
 } 
 model {
   for (i in 1:N) {

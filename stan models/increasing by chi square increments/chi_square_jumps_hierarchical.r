@@ -6,9 +6,6 @@ setwd(Sys.getenv("GITHUB_PATH"))
 setwd("./misc/stan models/increasing by chi square increments/")
 source("data generation function.R")
 
-N=50
-N2=10
-
 generate_data_and_fit_both_models <- function(N, N2) {
   
   #Generate fake data and aggregated fake data
@@ -33,9 +30,13 @@ generate_data_and_fit_both_models <- function(N, N2) {
   #add fitted theta's from aggregated model to plot  
   fake_data_aggregate$poserior_theta_means <- get_posterior_mean(fit1_aggregated,pars="theta")[,5]
   
-  fake_data_plot_with_aggregate <- plot_fake_data(fake_data)  +
-    geom_line(data=fake_data, aes(x=t,y=posterior_theta_means, color="posterior theta means")) +
+  plot_no_model <- plot_fake_data(fake_data)  +
     geom_point(data=fake_data_aggregate, mapping=aes(x=t,y=y, color="y aggregated"), size=5, alpha=.5) + 
+    ggtitle("one sample from prior for theta, y")
+
+  
+  fake_data_plot_with_aggregate <- plot_no_model +
+    geom_line(data=fake_data, aes(x=t,y=posterior_theta_means, color="posterior theta means")) +
     geom_line(data=fake_data_aggregate, aes(x=t,y=poserior_theta_means, color="posterior theta means from aggregates")) +
     ggtitle("true theta's, y's, the posterior theta means for each model")
     
@@ -44,8 +45,9 @@ generate_data_and_fit_both_models <- function(N, N2) {
        fake_data_aggregate=fake_data_aggregate, 
        fit=fit1,
        fit_aggregated=fit1_aggregated,
-       plot=fake_data_plot_with_aggregate)
-  
+       plot=fake_data_plot_with_aggregate,
+       plot_no_model = plot_no_model)
+    
 }
 
 
@@ -59,12 +61,14 @@ plot_posteriors_both_models <- function(fits, par) {
   s2 <- extract(fit_aggregated, pars=par)[[par]]
   samplesDF <- rbind(data.frame(par=s, model="not aggregated"),
                      data.frame(par=s2, model="aggregated"))
+  
   print(
     ggplot(data=samplesDF) + 
-    geom_histogram(mapping=aes(par, ..density.., fill=model), alpha=.5,position="dodge") +
-    geom_vline(aes(xintercept = truth_global_for_silly_reasons)) + 
-      ggtitle(paste("posterior for parameter",par,"from both models, with truth"))
+      geom_histogram(mapping=aes(par, ..density..), alpha=.5,position="dodge") +
+      geom_vline(aes(xintercept = truth_global_for_silly_reasons)) + facet_grid(model ~ ., scales="free_y") +
+      ggtitle(paste("posterior for",par,"with line at truth"))
   )
+  
 }
 
 samples_from_fit_to_DF <- function(fit, parameter, num_samples) {
@@ -92,12 +96,14 @@ plot_samples <- function(fit, n) {
   fake_data$sample_num = "0"
   fake_data <- fake_data[,names(fit_samples)]
   
-  
-  plot_samples <- ggplot(data=rbind(fit_samples, fit_aggregated_samples, fake_data)) + 
+  sampleDFs <- rbind(fit_samples, fit_aggregated_samples)
+  sampleDFs$model <- ifelse(sampleDFs$model=="fit$fit", "original data", "aggregated data")
+  sampleDFs <- rbind(sampleDFs, fake_data)
+  plot_samples <- ggplot(data=sampleDFs) + 
     geom_line(mapping=aes(x=t, y=theta, group=sample_num,color=model, 
                           size=ifelse(model=="truth","truth","models" )), alpha=1) +
-    ggtitle("samples from each model (aggregated and unaggregated) posterior theta") +
-    scale_size_discrete("")
+    ggtitle("samples from posterior theta") +
+    scale_size_discrete("", range=c(.5,2))
   plot_samples
 
 }
