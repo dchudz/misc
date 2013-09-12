@@ -150,6 +150,6 @@ plot_posteriors_both_models(fits1, "sigma_y")
 
 Another approach would have been to *start with* a continuous-time, monotone stochastic process on $[0, 1]$, and let the joint prior for $\{\theta_i\}$ follow from that. That would guarantee up front that the model is reasonable for any degree of discretization. We'd also have the advantage of starting with an understanding of what our process is like in the continuous limit as $N \rightarrow \infty$.
 
-For example, I only realized partway through this project that **the process I'm describing is discontinuous** (in the limit). Even with arbitrarily small intervals, it's a step function with (infinitely many) jumps of various sizes. That might be appropriate for some applications, but not for many. Adding a correlation structure to the jumps would be a reasonable expansion of the model. 
+For example, I only realized partway through this project that **the process I'm describing is discontinuous** (in the limit). Even with arbitrarily small intervals, it's a step function with a bunch of jumps of various sizes. That might be appropriate for some applications, but not for many. Adding a correlation structure to the jumps would be a reasonable expansion of the model. 
 
 Please let me know if you have any comments or suggestions! The flexibility of Stan is very powerful, but that includes the power to fit bad model. Examining a model's behavior under simulated data is one way to check it. I haven't done all of the check I'd want to, but hopefully this will provide an interesting example.
