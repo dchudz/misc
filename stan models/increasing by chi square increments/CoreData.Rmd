@@ -1,0 +1,10 @@
+
+```{r libs, error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+
+library(plyr)
+library(knitr)
+library(reshape2)
+library(randomForest)
+source(purl(paste(Sys.getenv("GITHUB_PATH"),"ShellGameChanger","data_processing2.Rmd",sep="/")))
+
+```

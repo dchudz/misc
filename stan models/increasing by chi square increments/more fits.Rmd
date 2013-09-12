@@ -18,8 +18,6 @@ fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
 fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
 fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
 fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
-fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
-fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,10))
 fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(50,5))
 fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(20,10))
 fits[[length(fits)+1]] <- c(fits,generate_data_and_fit_both_models(15,5))
@@ -32,9 +30,9 @@ Plot the data with the model fit:
 for (fit in fits) {
   print(fit$fit)
   print(fit$plot + ggtitle("data and model, aggregated and not"))
-  plot_posteriors_both_models(fit, "mean_mu_N")
-  plot_posteriors_both_models(fit, "sigma_mu_N")
-  plot_posteriors_both_models(fit, "sigma_0")
-  plot_samples(fit, 20)
+  plot_posteriors_both_models(fit, "mu_N")
+  plot_posteriors_both_models(fit, "sigma_N")
+  plot_posteriors_both_models(fit, "sigma_y")
+  print(plot_samples(fit, 20))
 }
 ```
