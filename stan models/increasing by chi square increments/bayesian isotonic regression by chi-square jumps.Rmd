@@ -87,7 +87,9 @@ samples <- ldply(c(10,100,1000),
 ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + 
   geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
   ggtitle(paste("prior for thetas, mu_N =", mu_N, ", sigma_N =", sigma_N))
+```
 
+```{r error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 mu_N=500
 sigma_N=100
 samples <- ldply(c(10,100,1000), 
@@ -96,19 +98,17 @@ samples <- ldply(c(10,100,1000),
 
 ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + 
   geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
-  ggtitle(paste("samples from prior for thetas, mu_N =", mu_N, ", sigma_N =", sigma_N))
-
+  ggtitle(paste("prior for thetas, mu_N =", mu_N, ", sigma_N =", sigma_N))
 
 ```
 
 Here are samples from my prior for $\{\theta_i\}$, sampling from the prior distribution for the hyperparameters $\mu_N$ and $\sigma_N$ (rather than specifying them as above).
 
 ```{r samples_from_theta_prior_and_hyperparameters2,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
-set.seed(38738)
-samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, generate_data_including_hyperparameters))
-ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
-  ggtitle("prior for thetas, sampling hyperparameters")
-last_plot() + coord_cartesian(ylim=c(0,1000)) + ggtitle("samples from prior for thetas")
+set.seed(387)
+samples3 <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, generate_data_including_hyperparameters))
+ggplot(data=transform(addZerosToSamples(samples3), N=factor(N))) + geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
+  ggtitle("prior for thetas, sampling hyperparameters") 
 ```
 
 Note a couple things:
@@ -120,6 +120,7 @@ A property we'd like this model to have is that we get similar results for the s
 
 ```{r fit_model, fig.show='hide', cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 set.seed(1)
+plot_fake_data(generate_data_including_hyperparameters(50))
 fits1 <- generate_data_and_fit_both_models(50,10)
 ```
 
@@ -133,21 +134,22 @@ The posterior means for $\{\theta_i\}$ are similar, whether we fit the original 
 print(fits1$plot + ggtitle("fit to original and aggregated y's"))
 ```
 
-We can also see that that the fits are similar by comparing samples from the posterior for $\{\theta_i\}$ from each model:
+We can also see if the fits are similar by comparing samples from the posterior for $\{\theta_i\}$ from each model:
 
 ```{r plot_posterior_sample_thetas, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 set.seed(7373)
 plot_samples(fits1, 20)
 ```
 
-The posterior distribution of the hyperparameters is also fairly similar between the two models, but sharper for the unaggregated version (as I think you'd expect). I may have made a bad choice parametrizing the model, since there seems to be a lot more trouble estimating $\sigma_N$ and $\mu_N$ than their ratio (which is ) 
+The posterior distribution for the hyperparameters (especially $\sigma_N$) is very wide. I think there maybe just isn't enough information to fit them well, so (unfortunately) the prior has a large influence. I haven't figured out a good way to handle that in this case. 
 
 ```{r posterior_hyperparameters, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
-mu_N_posterior <- plot_posteriors_both_models(fits1, "mu_N")
-sigma_N_posterior <- plot_posteriors_both_models(fits1, "sigma_N")
-plot_posteriors_both_models(fits1, "sigma_y")
+mu_N_posterior <- plot_posteriors(fits1, "mu_N")
+sigma_N_posterior <- plot_posteriors(fits1, "sigma_N")
+#plot_posteriors_both_models(fits1, "sigma_y")
 
-
+sigma_N_fit <- extract(fits1$fit, pars="sigma_N")[["sigma_N"]]
+mu_N_fit <- extract(fits1$fit, pars="mu_N")[["mu_N"]]
 
 fake_data <- fits1$fake_data
 fit <- fits1$fit
@@ -155,9 +157,9 @@ fit_aggregated <- fits1$fit_aggregated
 par <- c("mu_N", "sigma_N")
 truth <- fake_data[1,par]  #global for silly reasons
 truth
-true_ratio <- as.numeric(truth[2]/truth[1])
+true_ratio <- as.numeric(truth[2]**2/truth[1])
 s <- extract(fit, pars=par)
-posterior_ratio <- sapply(1:length(s$sigma_N), function(i) s$sigma_N[i]/s$mu_N[i])
+posterior_ratio <- sapply(1:length(s$sigma_N), function(i) s$sigma_N[i]**2/s$mu_N[i])
 s <- extract(fit_aggregated, pars=par)
 posterior_ratio_aggregated <- sapply(1:length(s$sigma_N), function(i) s$sigma_N[i]/s$mu_N[i])
 samplesDF <- rbind(data.frame(par=posterior_ratio, model="not aggregated"),

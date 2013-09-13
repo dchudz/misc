@@ -50,6 +50,20 @@ generate_data_and_fit_both_models <- function(N, N2) {
     
 }
 
+plot_posteriors <- function(fits, par) {
+  fake_data <- fits$fake_data
+  fit <- fits$fit
+  truth_global_for_silly_reasons <<- fake_data[1,par]  #global for silly reasons
+  s <- extract(fit, pars=par)[[par]]
+  samplesDF <- data.frame(par=s, model="not aggregated")
+
+  print(
+    ggplot(data=samplesDF) + 
+      geom_histogram(mapping=aes(par, ..density..), alpha=.5,position="dodge") +
+        geom_vline(aes(xintercept = truth_global_for_silly_reasons)) +  xlab(par) + 
+        ggtitle(paste("posterior for",par,"with line at truth"))
+  )
+}
 
 
 plot_posteriors_both_models <- function(fits, par) {

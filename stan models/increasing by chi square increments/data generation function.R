@@ -40,14 +40,14 @@ generate_data_mean_var <- function(mu_N, sigma_N_sq, N, sigma_y_sq) {
 generate_data_including_hyperparameters <- function(N) {
   
   mu_N <- runif(1)*1000
-  sigma_N <- runif(1)*1000
+  sigma_N <- runif(1)*mu_N
   sigma_y <- runif(1)*(mu_N)/50
   
   
   sigma_N_sq <- sigma_N**2
   sigma_y_sq <- sigma_y**2 
 
-  s = sqrt(sigma_N_sq / (2 * mu_N))
+  s = sigma_N_sq / (2 * mu_N)
   k_0 = mu_N / s
   
   fake_data <- generate_data(k_0, s, N, sigma_y_sq)  
