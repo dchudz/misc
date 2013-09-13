@@ -20,7 +20,7 @@ transformed parameters {
   real<lower=0> sigma_y_sq;
   sigma_y_sq <- pow(sigma_y, 2);
   sigma_N_sq <- pow(sigma_N , 2);
-  s <- sigma_N_sq / (2 * mu_N);
+  s <- sqrt(sigma_N_sq / (2 * mu_N));
   k_0 <- mu_N / s;
   theta <- cumulative_sum(s*jump);
 } 

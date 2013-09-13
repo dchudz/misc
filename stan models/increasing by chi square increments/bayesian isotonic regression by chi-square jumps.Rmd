@@ -143,9 +143,36 @@ plot_samples(fits1, 20)
 The posterior distribution of the hyperparameters is also fairly similar between the two models, but sharper for the unaggregated version (as I think you'd expect).
 
 ```{r posterior_hyperparameters, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
-plot_posteriors_both_models(fits1, "mu_N")
-plot_posteriors_both_models(fits1, "sigma_N")
+mu_N_posterior <- plot_posteriors_both_models(fits1, "mu_N")
+sigma_N_posterior <- plot_posteriors_both_models(fits1, "sigma_N")
 plot_posteriors_both_models(fits1, "sigma_y")
+
+
+sigma_N_fit <- extract(fits1$fit, pars="sigma_N")[["sigma_N"]]
+mu_N_fit <- extract(fits1$fit, pars="mu_N")[["mu_N"]]
+
+fits1$fake_data$sigma_N / fits1$fake_data$mu_N
+
+fake_data <- fits1$fake_data
+fit <- fits1$fit
+fit_aggregated <- fits1$fit_aggregated
+par <- c("mu_N", "sigma_N")
+truth <- fake_data[1,par]  #global for silly reasons
+truth
+true_ratio <- as.numeric(truth[2]/truth[1])
+s <- extract(fit, pars=par)
+posterior_ratio <- sapply(1:length(s$sigma_N), function(i) s$sigma_N[i]/s$mu_N[i])
+s <- extract(fit_aggregated, pars=par)
+posterior_ratio_aggregated <- sapply(1:length(s$sigma_N), function(i) s$sigma_N[i]/s$mu_N[i])
+samplesDF <- rbind(data.frame(par=posterior_ratio, model="not aggregated"),
+                     data.frame(par=posterior_ratio_aggregated, model="aggregated"))
+  print(
+    ggplot(data=samplesDF) + 
+      geom_histogram(mapping=aes(par, ..density..), alpha=.5,position="dodge") +
+      geom_vline(aes(xintercept = true_ratio)) + facet_grid(model ~ ., scales="free_y") +
+      ggtitle(paste("posterior for sigma_N/mu_N with line at truth"))
+  )
+
 ```
 
 Another approach would have been to *start with* a continuous-time, monotone stochastic process on $[0, 1]$, and let the joint prior for $\{\theta_i\}$ follow from that. That would guarantee up front that the model is reasonable for any degree of discretization. We'd also have the advantage of starting with an understanding of what our process is like in the continuous limit as $N \rightarrow \infty$.

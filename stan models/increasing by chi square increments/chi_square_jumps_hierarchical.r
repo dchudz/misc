@@ -68,7 +68,6 @@ plot_posteriors_both_models <- function(fits, par) {
       geom_vline(aes(xintercept = truth_global_for_silly_reasons)) + facet_grid(model ~ ., scales="free_y") +
       ggtitle(paste("posterior for",par,"with line at truth"))
   )
-  
 }
 
 samples_from_fit_to_DF <- function(fit, parameter, num_samples) {

@@ -74,11 +74,11 @@ We can also see that that the fits are similar by comparing samples from the pos
 
 The posterior distribution of the hyperparameters is also fairly similar between the two models, but sharper for the unaggregated version (as I think you'd expect).
 
-![plot of chunk posterior_hyperparameters](figure/posterior_hyperparameters1.png) ![plot of chunk posterior_hyperparameters](figure/posterior_hyperparameters2.png) ![plot of chunk posterior_hyperparameters](figure/posterior_hyperparameters3.png) 
+![plot of chunk posterior_hyperparameters](figure/posterior_hyperparameters1.png) ![plot of chunk posterior_hyperparameters](figure/posterior_hyperparameters2.png) ![plot of chunk posterior_hyperparameters](figure/posterior_hyperparameters3.png) ![plot of chunk posterior_hyperparameters](figure/posterior_hyperparameters4.png) 
 
 
 Another approach would have been to *start with* a continuous-time, monotone stochastic process on $[0, 1]$, and let the joint prior for $\{\theta_i\}$ follow from that. That would guarantee up front that the model is reasonable for any degree of discretization. We'd also have the advantage of starting with an understanding of what our process is like in the continuous limit as $N \rightarrow \infty$.
 
-For example, I only realized partway through this that **this process is 
+For example, I only realized partway through this project that **the process I'm describing is discontinuous** (in the limit). That might be appropriate for some applications, but not for many. Adding a correlation structure to the jumps would be a reasonable expansion of the model. 
 
 Please let me know if you have any comments or suggestions! The flexibility of Stan is very powerful, but that includes the power to fit bad model. Examining a model's behavior under simulated data is one way to check it. I haven't done all of the check I'd want to, but hopefully this will provide an interesting example.
