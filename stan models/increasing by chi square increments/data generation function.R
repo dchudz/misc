@@ -28,7 +28,7 @@ generate_data <- function(k_0, s, N, sigma_y_sq) {
 #             = s^2 * 2 * k_0
 #             = 2*s* E[theta_n]
 generate_data_mean_var <- function(mu_N, sigma_N_sq, N, sigma_y_sq) {
-  s = sigma_N_sq / (2 * mu_N)
+  s = sqrt(sigma_N_sq / (2 * mu_N))
   k_0 = mu_N / s
   generate_data(k_0, s, N, sigma_y_sq)  
 }
@@ -40,14 +40,14 @@ generate_data_mean_var <- function(mu_N, sigma_N_sq, N, sigma_y_sq) {
 generate_data_including_hyperparameters <- function(N) {
   
   mu_N <- runif(1)*1000
-  sigma_N <- runif(1)*mu_N
-  sigma_y <- runif(1)*(mu_N)/10
+  sigma_N <- runif(1)*1000
+  sigma_y <- runif(1)*(mu_N)/50
   
   
   sigma_N_sq <- sigma_N**2
   sigma_y_sq <- sigma_y**2 
 
-  s = sigma_N_sq / (2 * mu_N)
+  s = sqrt(sigma_N_sq / (2 * mu_N))
   k_0 = mu_N / s
   
   fake_data <- generate_data(k_0, s, N, sigma_y_sq)  
@@ -65,3 +65,4 @@ plot_fake_data <- function(fake_data) {
   fake_data_plot
 }
 
+plot_fake_data(generate_data_including_hyperparameters(100))

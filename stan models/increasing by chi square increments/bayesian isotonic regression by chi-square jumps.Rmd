@@ -55,7 +55,7 @@ $$\theta_i \sim \theta_{i-1} + s \cdot \chi^2(k_0/N)$$
 
 I chose to express $s$ and $k_0$ in terms of the mean $\mu_N$ and variance $\sigma_N^{2}$ of $\theta_N$:
 
-$$s = \frac{{\sigma_N}^2}{2 \mu_N} $$
+$$s = \sqrt{\frac{{\sigma_N}^2}{2 \mu_N}} $$
 $$k_0 = \mu_N / s$$
 
 I'll assume that we have data $y_i$ from a normal distribution centered on $\theta_i$ (independent, conditional on $\theta_i$). The variance of the $\{y_i\}$  should scale with $N$, since I'm assuming that if we sampled at a coarser scale, the $\{y_i\}$ at a coarser scale would be an average of the $\{y_i\}$ at a finer scale (and thus have lower variance):
@@ -65,8 +65,8 @@ $$y_i \sim N(\theta_i, N \cdot \sigma_y^2)$$
 We need priors for $\mu_N$, $\sigma_N$, and $\sigma_y$. This would naturally depend on the problem at hand, but I decided that both the variance of $\theta_N$ and the variance of the data $y_i$ should be sensitive to the mean $\theta_i$ of $\theta_n$:
 
 $$\mu_N \sim U[0,1000]$$
-$$\sigma_N \sim U[0,\mu_N]$$
-$$\sigma_y \sim U[0,\frac{\mu_N}{10}]$$
+$$\sigma_N \sim U[0,1000]$$
+$$\sigma_y \sim U[0,\frac{\mu_N}{50}]$$
 
 Here are some samples from my prior for the $\theta_i$, conditional on the specified $\mu_N$ and $\sigma_N$:
 
@@ -79,7 +79,7 @@ addZerosToSamples <- function(samples) {
 }
 
 mu_N=500
-sigma_N=400
+sigma_N=900
 samples <- ldply(c(10,100,1000), 
                  function(N) k_samples_N_internals(N, 20, 
                                                    function(N) generate_data_mean_var(mu_N, (sigma_N**2), N, 1)))
@@ -140,7 +140,7 @@ set.seed(7373)
 plot_samples(fits1, 20)
 ```
 
-The posterior distribution of the hyperparameters is also fairly similar between the two models, but sharper for the unaggregated version (as I think you'd expect).
+The posterior distribution of the hyperparameters is also fairly similar between the two models, but sharper for the unaggregated version (as I think you'd expect). I may have made a bad choice parametrizing the model, since there seems to be a lot more trouble estimating $\sigma_N$ and $\mu_N$ than their ratio (which is ) 
 
 ```{r posterior_hyperparameters, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
 mu_N_posterior <- plot_posteriors_both_models(fits1, "mu_N")
@@ -148,10 +148,6 @@ sigma_N_posterior <- plot_posteriors_both_models(fits1, "sigma_N")
 plot_posteriors_both_models(fits1, "sigma_y")
 
 
-sigma_N_fit <- extract(fits1$fit, pars="sigma_N")[["sigma_N"]]
-mu_N_fit <- extract(fits1$fit, pars="mu_N")[["mu_N"]]
-
-fits1$fake_data$sigma_N / fits1$fake_data$mu_N
 
 fake_data <- fits1$fake_data
 fit <- fits1$fit

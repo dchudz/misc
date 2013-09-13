@@ -8,8 +8,8 @@ parameters {
   vector<lower=0>[N] jump;                  # these are the jumps of our increasing function  theta
   real<lower=0, upper=1000>mu_N;        # mean of distribution that  theta_N  comes from 
                                             # (via the smaller jumps)
-  real<lower=0, upper=mu_N>sigma_N; # stdev for distribution for theta_N
-  real<lower=0, upper=mu_N/10>sigma_y;          # determines variance for y's:
+  real<lower=0, upper=1000>sigma_N; # stdev for distribution for theta_N
+  real<lower=0, upper=mu_N/50>sigma_y;          # determines variance for y's:
                                             #   y_i ~ N(theta_i, sqrt(sigma_y_sq*N))
 }
 transformed parameters {
