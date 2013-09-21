@@ -40,7 +40,7 @@ k_samples_N_internals <- function(N, k, sample_function)
 samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, sample_from_restricted_uniform))
 ggplot(data=transform(samples, N=factor(N))) + 
   geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
-  ggtitle("Samples from uniform distributio (with monotonicity)")
+  ggtitle("Samples from uniform distribution (with monotonicity)")
 
 ```
 
