@@ -35,7 +35,7 @@ generate_data_including_hyperparameters <- function(N) {
 #plotting the data
 plot_fake_data <- function(fake_data) {
   fake_data_plot <- ggplot(data=fake_data) + scale_color_discrete("") +
-    geom_line(mapping=aes(x=t,y=theta, color="theta")) +
+    geom_line(mapping=aes(x=t,y=theta, color="true theta")) +
     geom_point(mapping=aes(x=t,y=y,color="y")) 
   fake_data_plot
 }
