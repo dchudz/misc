@@ -14,8 +14,6 @@ parameters {
 transformed parameters {
   vector<lower=0>[N] theta;
   theta <- cumulative_sum(s*jump);
-  #theta <- cumulative_sum(jump);
-
 } 
 model {
   for (i in 1:N) {
