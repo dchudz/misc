@@ -1,3 +1,8 @@
+#  https://github.com/dchudz/misc/tree/master/weierstrass
+#  I release these code and any images I've produced using it into the public domain.
+#  You might find the images here: 
+
+
 #http://visvis.googlecode.com/hg/vvmovie/images2gif.py
 
 from mpmath import cplot, ellipfun, ellipk
@@ -49,25 +54,20 @@ if __name__=='__main__':
 	#make_plots(6, rerange = [-7,7], imrange = [-7,7], numpoints = 20000,outdir="./zoomed_out/", n_images=n_images)
 	#make_plots(6, rerange = [-1,1], imrange = [-1,1], numpoints = 20000,outdir="./zoomed_in/", n_images=n_images)
 
-	# from os import system	
-	# folders = ["zoomed_in"], "zoomed_out"]
-	# for folder in folders:
-	# 	system("convert -resize 50% -delay 20 -loop 0 ./" + folder + "/Weierstrass001.png " + folder + "_low_res.gif")
-
 	from os import system	
-	folder = "zoomed_in"
-	dither_options = [{"option":"-dither None", "name":"no_dither.gif"}, {"option": "", "name":"default_dither.gif"}, {"option":"", "name":"many_colors.png"}]
-	resolution_options = ["100","50","25"]
-	for dither_option in dither_options:
-		for resolution_option in resolution_options:
-			command = "convert -resize " + resolution_option + "% " + dither_option["option"] + " ./zoomed_in/Weierstrass001.png ./res" + resolution_option + dither_option["name"]
-			print command
-			system(command)
-		# system("convert  ./" + folder + "/Weierstrass001.png " + folder + ".gif")
-		# system("convert -resize 25% ./" + folder + "/Weierstrass001.png " + folder + "_very_low_res.gif")
-		# system("convert -resize 25% ./" + folder + "/Weierstrass001.png " + folder + "_very_low_res.png")
-		# system("convert -resize 50%  -dither None ./" + folder + "/Weierstrass001.png " + folder + "_low_res_no_dither.gif")
+	folders = ["zoomed_in", "zoomed_out"]
+	for folder in folders:
+		system("convert -resize 50% -delay 20 -loop 0 ./" + folder + "/*.png " + folder + ".gif")
 
+	# from os import system	
+	# folder = "zoomed_in"
+	# dither_options = [{"option":"-dither None", "name":"no_dither.gif"}, {"option": "", "name":"default_dither.gif"}, {"option":"", "name":"many_colors.png"}]
+	# resolution_options = ["100","50","25"]
+	# for dither_option in dither_options:
+	# 	for resolution_option in resolution_options:
+	# 		command = "convert -resize " + resolution_option + "% " + dither_option["option"] + " ./zoomed_in/Weierstrass001.png ./res" + resolution_option + dither_option["name"]
+	# 		print command
+	# 		system(command)
 
 
 
