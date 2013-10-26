@@ -216,3 +216,7 @@ pip-log.txt
 
 figure/
 cache/
+
+zoomed_in_and_out/
+zoomed_in/
+zoomed_out/
