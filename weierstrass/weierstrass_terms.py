@@ -1,6 +1,6 @@
 #  https://github.com/dchudz/misc/tree/master/weierstrass
 #  I release these code and any images I've produced using it into the public domain.
-#  You might find the images here: 
+#  You might find the images here: https://www.dropbox.com/sh/lkimmtg5gydtt3v/xIpq15ivRL/weierstrass
 
 
 #http://visvis.googlecode.com/hg/vvmovie/images2gif.py
