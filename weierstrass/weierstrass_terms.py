@@ -1,4 +1,4 @@
-#  I release this code and any images I've produced using it into the public domain.  -- David Chudzicki
+# John Baez wrote about these images here: http://blogs.ams.org/visualinsight/2014/01/15/weierstrass-elliptic-function/
 
 from mpmath import cplot, ellipfun, ellipk
 
