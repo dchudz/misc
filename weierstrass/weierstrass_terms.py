@@ -1,4 +1,3 @@
-# John Baez wrote about these images here: http://blogs.ams.org/visualinsight/2014/01/15/weierstrass-elliptic-function/
 
 from mpmath import cplot, ellipfun, ellipk
 
